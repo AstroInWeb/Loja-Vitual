@@ -102,15 +102,21 @@ class App:
                   self.loja.compra_aberta.Adicionar_produto(i,quant)
             pass
         elif opcao == '11':
-            self.loja.compra_aberta.Visualizar_compra()
+            if self.loja.compra_aberta != None:
+             self.loja.compra_aberta.Visualizar_compra()
+            else:
+                print("Sem compras")
             pass
         elif opcao == '12':
-            indice = input("indice item: ")
-            self.loja.compra_aberta.Remover_produto(indice)
+            if self.loja.compra_aberta != None:
+                indice = int(input("indice item: "))
+                self.loja.compra_aberta.Remover_produto(indice)
+            else:
+                print("Sem compras")
             pass
         elif opcao == '13':
-            indice = input("indice item: ")
-            novaQauntidade = input("quantidade: ")
+            indice = int(input("indice item: "))
+            novaQauntidade = int(input("quantidade: "))
             self.loja.compra_aberta.Atualizar_quantidade(indice, novaQauntidade)
             pass
         elif opcao == '14':

@@ -3,6 +3,7 @@ from produto_loja import Produto
 from pessoa_loja import Pessoa
 from item_loja import Item
 import pickle
+endereco = "C:/Users/Lenovo/Desktop/Loja_Virtual"
 class Loja:
     def __init__(self):
         self.produtos =[]
@@ -150,22 +151,25 @@ class Loja:
     def Compras_por_pessoa(self):
         pass
     def Salvar(self):
-        arquivop = open("LojaVirtual/produtos.bin","wb")
-        arquivoc = open("LojaVirtual/compras.bin","wb")
+        arquivop = open(endereco+"/produtos.bin","wb")
+        arquivoc = open(endereco+"/compras.bin","wb")
         for p in self.produtos:
             pickle.dump(p,arquivop)
         for c in self.compras:
             pickle.dump(c,arquivoc )
     def Carregar(self):
-        arquivop = open("LojaVirtual/produtos.bin","rb")
-        arquivoc = open("LojaVirtual/compras.bin","rb")
+        arquivop = open(endereco+"/produtos.bin","rb")
+        arquivoc = open(endereco+"/compras.bin","rb")
         while True:
             try:
-                objp = pickle.load(arquivop)
-                self.produtos.append(objp)
-            except EOFError:
-             break
-         
+                 objp = pickle.load(arquivop)
+                 self.produtos.append(objp)
+            except EOFError:    
+                 break
+            except FileNotFoundError:
+                 open(endereco+"/produtos.bin","w+")
+                 open(endereco+"/compras.bin","w+")
+            
         while True:
             try:
                 self.compras.append(pickle.load(arquivoc))
