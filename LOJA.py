@@ -3,13 +3,38 @@ from produto_loja import Produto
 from pessoa_loja import Pessoa
 from item_loja import Item
 import pickle
-endereco = "C:/Users/Lenovo/Desktop/Loja_Virtual"
+import os
+endereco = "/home/gabriel/Área de Trabalho/Loja-Vitual"
+
 class Loja:
     def __init__(self):
-        self.produtos =[]
+        self.produtos = []
         self.compras = []
         self.compra_aberta = None
-    
+
+    def cadastrar_produto(self):
+        nome = input("nome: ")
+        codigo = input("codigo: ")
+        preco = float(input("preco: "))
+        categoria = input("categoria: ")
+        produto = Produto(nome, codigo, preco, categoria)
+        self.produtos.append(produto)
+        self.Salvar()
+
+    def lista_produtos(self):
+        for i in self.produtos:
+            print(f"codigo: {i.codigo},nome: {i.nome},preco: {i.Preco()}\n")
+        
+    def detalhes_produtos(self):
+        codigo = input("codigo: ")
+        for i in  self.produtos:
+            if i.codigo == codigo:
+                print(f"nome:{i.nome}\ncodigo:{i.codigo}\npreco:{i.preco}\nestoque:{i.quant_estoque}\ndesconto:{i.desconto_percentual}\ncategoria;{i.categoria}\n")
+        
+    def imprimir_clientes(self):
+         for c in self.compras:
+            print(f"{c.cliente}\n")
+
     def Iniciar_compra(self, cliente:Pessoa):
         compra = Compra(cliente)
         if self.compra_aberta == None:
@@ -41,16 +66,26 @@ class Loja:
     def Buscar_produto(self, codigo:str):
         for produto in self.produtos:
             if produto.codigo == codigo:
-                return produto
+                return 1
             
-        return None
+        return 0
         
     def Cancelar_compra(self):
-        self.compra_aberta = None
+        if self.compra_aberta == None:
+            print("Não ha compra aberta no momento\n")
+        else:
+            self.compra_aberta = None
         
     def Finalizar_compra(self):
-        self.compras.append(self.compra_aberta)
-        self.compra_aberta = None
+        if self.compra_aberta == None:
+            print("Não ha compra aberta no momento\n")
+        else:
+            self.compras.append(self.compra_aberta)
+            self.compra_aberta = None
+            print("compra finalizada\n")
+
+        self.Salvar()
+        print(f"{self.compras[0].cliente}\n")
         
     def Número_de_produtos(self):
         return len(self.produtos)
@@ -59,22 +94,31 @@ class Loja:
         return len(self.compras)
         
     def Valor_total_vendido(self):
-        total =0
+        total = 0
         for i in self.compras:
-            total += i.custos()
+            for x in i.itens:
+               preco = float(x.produto_sendo_adquirido.preco )
+               total += preco * float( x.copias)
+
         return total
+    
     def Valor_médio_das_compras(self):
-        total =0
+        total = 0
         for i in self.compras:
-            total += i.custos()
-        return (total/len(self.compras))
+            for x in i.itens:
+               preco = float(x.produto_sendo_adquirido.preco )
+               total += preco * float( x.copias)
+        return (total/float(len(self.compras)))
+    
     def Número_de_usuários(self):
         usuario = []
+
         for i in self.compras:
-            usuario.append(i.cliente)
-            for a in usuario:
+            if i.cliente not in usuario:
+                usuario.append(i.cliente)
+            """ for a in usuario:
                 if i.cliente == a:
-                    usuario.remove(i.cliente)
+                    usuario.remove(i.cliente) """
                     
         return len(usuario)
             
@@ -147,31 +191,55 @@ class Loja:
                 print(f"{produtos_ordem[x].nome},{produtos_ordem[x].codigo},{quant_ordem[x]*valor_ordem[x]}")
             
                 
-        
-    def Compras_por_pessoa(self):
-        pass
-    def Salvar(self):
-        arquivop = open(endereco+"/produtos.bin","wb")
-        arquivoc = open(endereco+"/compras.bin","wb")
-        for p in self.produtos:
-            pickle.dump(p,arquivop)
-        for c in self.compras:
-            pickle.dump(c,arquivoc )
-    def Carregar(self):
+    def verifica_produto_salvo(self):
+
         arquivop = open(endereco+"/produtos.bin","rb")
-        arquivoc = open(endereco+"/compras.bin","rb")
-        while True:
-            try:
-                 objp = pickle.load(arquivop)
-                 self.produtos.append(objp)
-            except EOFError:    
-                 break
-            except FileNotFoundError:
-                 open(endereco+"/produtos.bin","w+")
-                 open(endereco+"/compras.bin","w+")
-            
-        while True:
-            try:
-                self.compras.append(pickle.load(arquivoc))
-            except EOFError:
-             break
+        objp = pickle.load(arquivop)
+        print(f"{objp.type()}\n")
+        
+    
+    def Compras_por_pessoa(self):
+        for x in self.compras:
+            print(f"\n{x.cliente.nome}, {len(x.itens)} itens")
+            for y in x.itens:
+                print(f"{y.produto_sendo_adquirido.nome}, {y.copias}")
+
+        print("\n")
+
+
+        
+
+    def Salvar(self):
+
+        with open("arquivos/produtos.bin","wb") as arquivop:
+            pickle.dump([a.dump_produto() for a in self.produtos ],arquivop)
+            arquivop.close()
+
+        # Salvar a compra em um arquivo binário
+        with open('arquivos/compras.pickle', 'wb') as arquivoc:
+             pickle.dump([compra.dump_compra() for compra in self.compras], arquivoc)
+             arquivoc.close()
+
+    def Carregar(self):
+        if not os.path.exists('arquivos/compras.pickle'):
+            open('arquivos/compras.pickle', 'w').close()
+
+        with open("arquivos/produtos.bin","rb") as arquivop:
+            """ if EOFError:
+                print("arquivo inexixtente\n")
+                pass
+            else : """
+            self.produtos = [Produto.load_produto(*x) for x in pickle.load(arquivop)]
+            arquivop.close()
+
+
+        # Carregar a compra de um arquivo binário
+        with open('arquivos/compras.pickle', 'rb') as arquivoc:
+            """ if FileNotFoundError:
+                print("arquivo inexixtente\n")
+                pass
+            else : """
+            self.compras = [Compra.load_compra(*compra) for compra in pickle.load(arquivoc)]
+            arquivoc.close()
+                 
+

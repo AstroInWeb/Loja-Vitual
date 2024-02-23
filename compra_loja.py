@@ -1,22 +1,27 @@
 from item_loja import Item
 from pessoa_loja import Pessoa
 from produto_loja import Produto 
+from item_loja import Item
 
 class Compra:
     def __init__(self, cliente:Pessoa):
         self.cliente = cliente
         self.itens = [] 
                
-    def custos(self):
-        custo_total =0
-        for i in self.itens:
-            custo_total += i.custo
-        return custo_total
+    def dump_compra(self):
+        return (self.cliente, [item.dump_item() for item in self.itens])
+
+    @staticmethod
+    def load_compra(cliente, itens):
+        compra = Compra(cliente)
+        compra.itens = [Item.load_item(*item) for item in itens]
+        return compra
     
     def Adicionar_produto(self, produto:Produto, quantidade:int ):
-        item = Item(produto, quantidade)
+
+        item = Item(produto , quantidade)
         self.itens.append(item)
-        print(len(self.itens),"\n")
+        print(f"Quantidade de produtos na compra: {len(self.itens)}\n")
     
     def Remover_produto(self, indice):
         self.itens.remove(self.itens[indice])
@@ -28,10 +33,13 @@ class Compra:
         
         valor_total = 0
         indice =0
-        for produto in self.itens:
-            valor_total += (float(produto.produto_sendo_adquirido.preco) * float(produto.copias))
-            print(f"nome: {produto.produto_sendo_adquirido.nome}\nvalor:{float(produto.produto_sendo_adquirido.preco)}\nvalor total do produto:{float(produto.produto_sendo_adquirido.preco) * float(produto.copias)}\nindice{indice}\n")
-            indice+=1
-        print(f"valor total: {valor_total}")
-            
+        if len(self.itens) == 0:
+            print("Nao ha itens\n")
+        else:
+            for produto in self.itens:
+                valor_total += (float(produto.produto_sendo_adquirido.preco) * float(produto.copias))
+                print(f"nome: {produto.produto_sendo_adquirido.nome}\nvalor:{float(produto.produto_sendo_adquirido.preco)}\nvalor total do produto:{float(produto.produto_sendo_adquirido.preco) * float(produto.copias)}\nindice{indice}\n")
+                indice+=1
+            print(f"valor total: {valor_total}")
+                
         

@@ -1,6 +1,9 @@
 from LOJA import Loja
 from produto_loja import Produto
 from pessoa_loja import Pessoa
+from compra_loja import Compra
+
+
 class App:
     def __init__(self):
         self.loja = Loja()
@@ -8,6 +11,7 @@ class App:
     def menu(self):
         
         opcao = 0
+        print("0. Cad\n")
         print("1. Cadastrar produto\n")
         print("2. Ver lista de produtos\n")
         print("3. Ver detalhes de produto\n")
@@ -31,27 +35,19 @@ class App:
         print("21. Relatório - 5 produtos mais vendidos\n")
         print("22. Relatório – Montante por pessoa\n")
         opcao  = input("Opção: ")
+
+
         
         if opcao == '1':
-            nome = input("nome: ")
-            codigo = input("codigo: ")
-            preco = input("preco: ")
-            categoria = input("categoria: ")
-            produto = Produto(nome, codigo, preco, categoria)
-            self.loja.inserir_produtos(produto)
+            self.loja.cadastrar_produto()
             
         elif opcao == '2':
-            indice =0
-            for i in self.loja.produtos:
-                print(f"codigo: {i.codigo},nome: {i.nome},preco: {i.Preco()},indice: {indice}")
-                indice +=1
+            self.loja.lista_produtos()
                 
         elif opcao == '3':
-            codigo = input("codigo: ")
-            for i in  self.loja.produtos:
-                if i.codigo == codigo:
-                    print(f"{i.nome},{i.codigo},{i.preco},{i.quant_estoque},{i.desconto_percentual},{i.categoria},{i.Preco()}\n")
-            pass
+            self.loja.detalhes_produtos()
+
+
         elif opcao == '4':
             codigo = input("codigo: ")
             desconto = float(input("desconto: "))
@@ -78,84 +74,101 @@ class App:
                 if i.codigo == codigo:
                    self.loja.produtos.remove(i)
                    return 1
-            pass
+            
         elif opcao == '7':
             nome =input("nome: ")
             email=input("email: ")
             cpf=input("cpf: ")
             cliente = Pessoa(nome, email,cpf)
             self.loja.Iniciar_compra(cliente)
-            pass
-        elif opcao == '8':
             
+        elif opcao == '8':
             self.loja.Cancelar_compra()
-            return 1
+         
         elif opcao == '9':
             self.loja.Finalizar_compra()
             self.loja.Salvar()
-            pass
+            
         elif opcao == '10':
-            codigo = input("codigo: ")
-            quant = input("quantidade: ")
-            for i in  self.loja.produtos:
-                if i.codigo == codigo: 
-                  self.loja.compra_aberta.Adicionar_produto(i,quant)
-            pass
+            
+            if self.loja.compra_aberta == None:
+                print("Não ha compra aberta no momento\n")
+            else :
+                codigo = input("codigo: ")
+                if self.loja.Buscar_produto(codigo):
+                    quant = input("quantidade: ")
+                    for i in  self.loja.produtos:
+                        if i.codigo == codigo: 
+                            self.loja.compra_aberta.Adicionar_produto(i,quant)
+                else: 
+                    print("Produto nao existe\n")
+                    
         elif opcao == '11':
+
             if self.loja.compra_aberta != None:
-             self.loja.compra_aberta.Visualizar_compra()
+                self.loja.compra_aberta.Visualizar_compra()
             else:
-                print("Sem compras")
-            pass
+                print("Não ha compra aberta no momento\n")
+            
         elif opcao == '12':
+
             if self.loja.compra_aberta != None:
                 indice = int(input("indice item: "))
                 self.loja.compra_aberta.Remover_produto(indice)
             else:
-                print("Sem compras")
-            pass
+                print("Não ha compra aberta no momento\n")
+            
         elif opcao == '13':
-            indice = int(input("indice item: "))
-            novaQauntidade = int(input("quantidade: "))
-            self.loja.compra_aberta.Atualizar_quantidade(indice, novaQauntidade)
-            pass
+            if self.loja.compra_aberta != None:
+                indice = int(input("indice item: "))
+                novaQauntidade = int(input("quantidade: "))
+                self.loja.compra_aberta.Atualizar_quantidade(indice, novaQauntidade)
+            else:
+                print("Não ha compra aberta no momento\n")
+
+            
         elif opcao == '14':
             print(f"{self.loja.Número_de_produtos()}")
-            pass
+            
         elif opcao == '15':
             print(f"{self.loja.Número_de_vendas()}")
-            pass
+            
         elif opcao == '16':
             print(f"{self.loja.Valor_total_vendido()}")
-            pass
+            
         elif opcao == '17':
             print(f"{self.loja.Valor_médio_das_compras()}")
-            pass
+            
         elif opcao == '18':
             print(f"{self.loja.Número_de_usuários()}")
-            pass
+            
         elif opcao == '19':
             pessoa = self.loja.Usuário_que_mais_fez_compras()
             print(f"{pessoa.nome},{pessoa.email},{pessoa.cpf}")
-            pass
+            
         elif opcao == '20':
             produtos=self.loja.produtos_mais_caros()
             for p in produtos:
                 print(f"{p.nome},{p.codigo},{p.preco},{p.categoria}")
-            pass
+            
         elif opcao == '21':
             self.loja.produtos_mais_vendidos()
-            pass
+            
         elif opcao == '22':
             self.loja.Compras_por_pessoa()
-            pass
+
+        elif opcao == '0':
+            
+            self.loja.imprimir_clientes()
+        elif opcao == '00':
+            self.loja.verifica_produto_salvo()
         else:
             print("Opcão invalid.")    
         
     
     def executar(self):
-        while 1:
+        while True:
          self.menu()
-         self.loja.Salvar()
+         """ self.loja.Salvar() """
          
         
